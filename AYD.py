@@ -1,51 +1,189 @@
-from pytube import YouTube, exceptions, request
-link = input("Please enter the youtube link : ")
+'''Alpha YouTube Downloader is a python script for downloading audios and and videos from YouTube,
+You Provide The URL, and AYD serves you with the desired file :) .
+pros:
+    - You can download videos and musics for free, no charge, no ad, no disturbance
+    - safe and trusted, you can observe and investigate the whole code, nothing is hidden from your eyes
+    - acceptably fast, if your internet connection is not slow as ..., turtle! 
+    
+cons:
+    - you can't chose the resolution :(, all the videos are available as 720p
+    - not visually perfect, a nice GUI would be better I don't want to argue
+    - probably not very user-friendly, especially for those who don't use CLI programs very often
+    - you need python Installed, plus all of its dependencies, which I think is the biggest cons so far :(
+        
+    overall I think it is still useful, not for everyone, but for those like me that already has python installed, doesn't care about nice UI or using CLI programs,
+    and doesn't want to pay, see ads, or risk for downloading a video.
 
+    but that doesn't mean I don't have plans for making it better, but I could use some help :>>
+    , would be very cool if you guys help me, I would really appreciate, thank for helping, or even using AYD :) '''
+
+# --- Importing dependencies ---
+from pytube import YouTube, exceptions, request
+import os
+# for error handling
+from http.client import RemoteDisconnected, IncompleteRead 
+from urllib.error import URLError
+
+# If there's not a folder with desired name, create a new one
+def file_path(name="AYD"):
+    """creates a folder with provided parameter name if does not exist, then returns the name"""
+    if not name in os.listdir(os.getcwd()):
+        os.mkdir(name)
+    return name
+
+# specifies the chunk size
 request.default_range_size = 1048576
+
 def completed(artist, song_name):
-        print(f"\n  Downloaded successfully\n enjoy :)\n")
+    """gets called after the successful download"""
+    print(f"\n  Downloaded successfully\n enjoy :)\n")
+
 
 def progress_bar(self, chunk, bytes_remaining):
+    """shows progress bar"""
     print(f"{round(bytes_remaining*0.000001)} MB remaining")
-# Making a YouTube Object to continue
-url = YouTube(link,on_progress_callback=progress_bar,on_complete_callback=completed)
 
-file = input(f'Found " {url.title} ", Do You Want the video or only the audio?\n 1 -> Video\n 2 -> Audio\n  $: ')
+def check_name(file_name):
+    """checks the name for possible characters in name that unsupported and raise error,
+    if found, replaces with whitespace, then returns the corrected name"""
+    for i in file_name:
+        if i in [":", "|", "<", ">", "؟", "'", '"', "?", "/", "*"]:
+            file_name = file_name.replace(i, " ")
+    return file_name
 
-file = file.strip()
+def title(url):
+    """returns the title in desired/ideal format"""
+    title = f"{url.author} - {url.title}"
+    return title
 
-try:
-    def get_video(url):
-        
-        url.streams.filter(progressive=True).get_highest_resolution().download()
-    def get_audio(url):
-        # a function to find the highest quality among all of them
-        def get_max_abr():
-            # making a streams object with youtube object, to use the filter method that returns a list of audios
-            aud = url.streams.filter(only_audio=True)
-            abrs = set([i.abr for i in aud])
-            abrs.discard(None)
-            max_abr = max([int(i.replace("kbps","")) for i in abrs]) 
-            max_abr = f"{max_abr}kbps"
-            return max_abr
+def file_name(url, audio=False):
+    """returns the name of the file after passing the checking process, if the file is video it returns the default file name,
+    if the file is audio, it appends the ".mp3" suffix to the desired file name"""
+    if audio:
+        file_name = title(url)
+        file_name = check_name(file_name)
+        return file_name + ".mp3"
 
-        # an optional function to name the downloaded file + ".mp3" suffix that is more convenient than possible ".webm" suffix
-        def file_name(link):
-            title = url.title
-            author = url.author
-            return author + " - " + title + ".mp3"
+    file_name = url.streams.first().default_filename
+    file_name = check_name(file_name)
 
-        # finally, downloading the desired Music/Audio
-        url.streams.filter(abr=get_max_abr()).first().download(filename=file_name(link))
+    return file_name
+
+def yt_url():
+    """get's the YouTube video url from the user and creates a YouTube object"""
+    try:
+        link = input("\nPlease enter the youtube link : ")
+        print("please wait ...")
+        url = YouTube(
+            link, on_progress_callback=progress_bar, on_complete_callback=completed
+        )
+        return url
+    except exceptions.RegexMatchError:
+        print("Please Enter a Valid YouTube link")
+        return yt_url()
+
+def download_video(url):
+    """Downloads the video"""
+    print("Downloading ... ")
+    try:
+        url.streams.filter(progressive=True).get_highest_resolution().download(
+            output_path=file_path(), filename=file_name(url)
+        )
+
+    except exceptions.AgeRestrictedError:
+        print("Age Restricted!, can not download, please try with another video :(")
+        exit()
+    except Exception as Error:
+        print(
+            "Something went wrong when trying to downloading the video!, Please re-run the program. ERROR DETAILS : ",
+            Error,
+        )
+        exit()
+
+def download_audio(url):
+    """Downloads the audio"""
+    print("Downloading ... ")
+    try:
+        url.streams.filter(abr=max_abr(url)).first().download(
+            output_path=file_path(), filename=file_name(url, audio=True)
+        )
+
+    except exceptions.AgeRestrictedError:
+        print("Age Restricted!, can not download, please try with another video :(")
+        exit()
+    except Exception as Error:
+        print(
+            "Something went wrong when trying to downloading the audio!, Please re-run the program. ERROR DETAILS : ",
+            Error,
+        )
+        exit()
+
+def max_abr(url):
+    """finds and returns the highest quality audio"""
+    try:
+        aud = url.streams.filter(only_audio=True)
+        abrs = set([i.abr for i in aud])
+        abrs.discard(None)
+        max_abr = max([int(i.replace("kbps", "")) for i in abrs])
+        max_abr = f"{max_abr}kbps"
+        return max_abr
+    except Exception as Error:
+        print(
+            "Something went wrong when trying to find the highest quality audio!, Please re-run the program. ERROR DETAILS : ",
+            Error,
+        )
+        exit()
 
 
-except exceptions.AgeRestrictedError:
-    print("Age Restricted!")
+def download_type(url, fn):
+    """a recursion function, provides the option for the user to chose between video or only audio, it calls itself until gets a valid input,
+    then returns the chose"""
+    print(f"\n'{fn}' found,")
+    type = input(
+        "Do You Want the video or only the audio?\n 1 -> Video\n 2 -> Audio\n  $: "
+    )
+    if not type.strip() in ["1", "2"]:
+        return download_type(url, fn)
+    return type
 
 
-if file == "1":
-    get_video(url)
-elif file == "2":
-    get_audio(url)
-else:
-    print("NOT correct!")
+def download(type, url):
+    """calls the correct download function based on the user chose"""
+    if type == "1":
+        download_video(url)
+    else:
+        download_audio(url)
+
+
+# - - - Main - - -
+if __name__ == "__main__":
+    """The Entry point of the program"""
+    while True:
+        try:
+            url = yt_url()
+            fn = title(url)
+            dl_type = download_type(url, fn)
+            download(dl_type, url)
+            finish = input(
+                f"'{fn}' Downloaded successfully!, press 'q' for exit or anything else to continue : "
+            )
+            if finish.strip().lower() == "q":
+                print("Bye-Bye!")
+                exit()
+        except RemoteDisconnected:
+            print("NetWork Error!, please check your network and try again")
+            exit()
+        except IncompleteRead:
+            print("NetWork Error!, please check your network and try again")
+            exit()
+        except URLError:
+            print("NetWork Error!, please check your network and try again")
+            exit()
+        except Exception as Error:
+            print(
+                """Something went wrong during the run!, please check your connection and retry, if it happened again
+                Please open an issue in https://github.com/Yasin1ar/Alpha-Youtube-Downloader/issues,
+                thanks for your contribute to improvement of this program! :)\nERROR DETAILS : """,
+                Error,
+            )
+            exit()

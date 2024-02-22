@@ -1,41 +1,53 @@
 # Alpha-Youtube-Downloader
 ## A Program for downloading Videos &amp; Audios from YouTube using pytube (Python library)
 
-![preview image](https://github.com/Yasin1ar/Alpha-Youtube-Downloader/blob/5280cd091faf5f43c1f84eeb102996cf054cb592/Preview.PNG)
+### felow diagram : basic logic of the program
+![felow diagram : basic logic of the program](./felow_diagram.jpg)
+
+#### Alpha YouTube Downloader is a python script for downloading audios and and videos from YouTube, You Provide The URL, and AYD serves you with the desired file :) 
+pros:
+- You can download videos and musics for free, no charge, no ad, no disturbance
+- safe and trusted, you can observe and investigate the whole code, nothing is hidden from your eyes
+- acceptably fast, if your internet connection is not slow as ..., turtle! 
+    
+cons:
+- you can't chose the resolution :(, all the videos are available as 720p
+- not visually perfect, a nice GUI would be better I don't want to argue
+- probably not very user-friendly, especially for those who don't use CLI programs very often
+- you need python Installed, plus all of its dependencies, which I think is the biggest cons so far :(
+
+overall I think it is still useful, not for everyone, but for those like me that already has python installed, doesn't care about nice UI or using CLI programs,
+and doesn't want to pay, see ads, or risk for downloading a video.
+
+#### but that doesn't mean I don't have plans for making it better, but I could use some help :), would be very cool if you guys help me, I would really appreciate, thank for helping, or even using AYD :) 
 
 
-It has many efficient features like:
+# how to use
+### prerequise
+you need to have :
+- python
+- pytube package
+- a cup of cofee
+- a brave and kind heart
 
-Downloading Videos
+### how to install pytube?
+`pip install -r requirements.txt`
 
-Downloading Audios
+that's it!
 
-Downloading Playlist of videos or Audios
+### note : it is a good practice to use a virtual environment
 
-Any quality you want, even higher than 1080p and 4k if video suppurts!
+`python -m venv .env`
 
-simple, Easy to use & interactive with user
+in Windows:
 
-Note : The python version you have must be 3 or higher, and you have to Install FFmpeg in case that you did not before.
+`.env/Scripts/Activate.ps1`
 
-**Installing FFmpeg**
+in Linux:
 
-[Windows Tutorial](https://windowsloop.com/install-ffmpeg-windows-10/)
+`source venv/bin/activate`
 
-for OSX use the command ```brew install ffmpeg```
+## Run it!
+Simply download the program and run it :)
 
-for Linux use the command ```sudo apt install ffmpeg```
 
-python Packages you need to have before using :
-
-`
-ffmpeg-python==0.2.0
-`
-
-`
-future==0.18.2
-`
-
-`
-pytube==12.0.0
-`
