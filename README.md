@@ -2,7 +2,7 @@
 ## A Program for downloading Videos &amp; Audios from YouTube using pytube (Python library)
 
 ### felow diagram : basic logic of the program
-![felow diagram : basic logic of the program](./felow_diagram.jpg)
+![felow diagram : basic logic of the program](./flow_diagram.jpg)
 
 #### Alpha YouTube Downloader is a python script for downloading audios and and videos from YouTube, You Provide The URL, and AYD serves you with the desired file :) 
 pros:
