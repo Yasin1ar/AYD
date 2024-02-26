@@ -82,42 +82,6 @@ def yt_url():
         print("Please Enter a Valid YouTube link")
         return yt_url()
 
-def download_video(url):
-    """Downloads the video"""
-    print("Downloading ... ")
-    try:
-        url.streams.filter(progressive=True).get_highest_resolution().download(
-            output_path=file_path(), filename=file_name(url)
-        )
-
-    except exceptions.AgeRestrictedError:
-        print("Age Restricted!, can not download, please try with another video :(")
-        exit()
-    except Exception as Error:
-        print(
-            "Something went wrong when trying to downloading the video!, Please re-run the program. ERROR DETAILS : ",
-            Error,
-        )
-        exit()
-
-def download_audio(url):
-    """Downloads the audio"""
-    print("Downloading ... ")
-    try:
-        url.streams.filter(abr=max_abr(url)).first().download(
-            output_path=file_path(), filename=file_name(url, audio=True)
-        )
-
-    except exceptions.AgeRestrictedError:
-        print("Age Restricted!, can not download, please try with another video :(")
-        exit()
-    except Exception as Error:
-        print(
-            "Something went wrong when trying to downloading the audio!, Please re-run the program. ERROR DETAILS : ",
-            Error,
-        )
-        exit()
-
 def max_abr(url):
     """finds and returns the highest quality audio"""
     try:
@@ -134,26 +98,70 @@ def max_abr(url):
         )
         exit()
 
+def download_video(url,custom_res:str):
+    """Downloads the video"""
+    print("Downloading ... ")
+    url.streams.filter(res=custom_res).first().download(
+        output_path=file_path(), filename=file_name(url)
+    )
 
-def download_type(url, fn):
+def download_audio(url):
+    """Downloads the audio"""
+    print("Downloading ... ")
+    url.streams.filter(abr=max_abr(url)).first().download(
+        output_path=file_path(), filename=file_name(url, audio=True)
+    )
+
+
+def download_type(fn):
     """a recursion function, provides the option for the user to chose between video or only audio, it calls itself until gets a valid input,
     then returns the chose"""
     print(f"\n'{fn}' found,")
-    type = input(
+    dl_type = input(
         "Do You Want the video or only the audio?\n 1 -> Video\n 2 -> Audio\n  $: "
     )
-    if not type.strip() in ["1", "2"]:
-        return download_type(url, fn)
-    return type
+    if not dl_type.strip() in ["1", "2"]:
+        return download_type(fn)
+    return dl_type
+
+# returns the selected res (140p, 360p, ...)
+def select_resolution(url) -> str:
+    print("Getting resolutions ... ")
+
+    resolutions = []
+
+    i = 0;
+    for stream in url.streams.filter(mime_type="video/mp4"):
+        if not stream.resolution in resolutions:
+            print(f"{i}. {stream.resolution}")
+            resolutions.append(stream.resolution)
+            i+=1
+
+    print("Chose resolution: ")
+    custom_res = int(input(">> "))
+
+    return resolutions[custom_res]
 
 
-def download(type, url):
-    """calls the correct download function based on the user chose"""
-    if type == "1":
-        download_video(url)
-    else:
-        download_audio(url)
+def download(dl_type:str, url):
+    dl_type_name = "Video" if dl_type=="1" else "Audio"
 
+    try:
+        """calls the correct download function based on the user chose"""
+        if dl_type == "1":
+            download_video(url,select_resolution(url))
+        else:
+            download_audio(url)
+
+    except exceptions.AgeRestrictedError:
+        print(f"Age Restricted!, can not download, please try with another {dl_type_name} :(")
+        exit()
+    except Exception as Error:
+        print(
+            f"Something went wrong when trying to downloading the {dl_type_name}!, Please re-run the program. ERROR DETAILS : ",
+            Error,
+        )
+        exit()
 
 # - - - Main - - -
 if __name__ == "__main__":
@@ -162,7 +170,7 @@ if __name__ == "__main__":
         try:
             url = yt_url()
             fn = title(url)
-            dl_type = download_type(url, fn)
+            dl_type = download_type(fn)
             download(dl_type, url)
             finish = input(
                 f"'{fn}' Downloaded successfully!, press 'q' for exit or anything else to continue : "
