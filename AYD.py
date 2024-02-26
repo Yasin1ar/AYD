@@ -85,38 +85,16 @@ def yt_url():
 def download_video(url):
     """Downloads the video"""
     print("Downloading ... ")
-    try:
-        url.streams.filter(progressive=True).get_highest_resolution().download(
+    url.streams.filter(progressive=True).get_highest_resolution().download(
             output_path=file_path(), filename=file_name(url)
         )
-
-    except exceptions.AgeRestrictedError:
-        print("Age Restricted!, can not download, please try with another video :(")
-        exit()
-    except Exception as Error:
-        print(
-            "Something went wrong when trying to downloading the video!, Please re-run the program. ERROR DETAILS : ",
-            Error,
-        )
-        exit()
 
 def download_audio(url):
     """Downloads the audio"""
     print("Downloading ... ")
-    try:
-        url.streams.filter(abr=max_abr(url)).first().download(
+    url.streams.filter(abr=max_abr(url)).first().download(
             output_path=file_path(), filename=file_name(url, audio=True)
         )
-
-    except exceptions.AgeRestrictedError:
-        print("Age Restricted!, can not download, please try with another video :(")
-        exit()
-    except Exception as Error:
-        print(
-            "Something went wrong when trying to downloading the audio!, Please re-run the program. ERROR DETAILS : ",
-            Error,
-        )
-        exit()
 
 def max_abr(url):
     """finds and returns the highest quality audio"""
@@ -135,7 +113,7 @@ def max_abr(url):
         exit()
 
 
-def download_type(url, fn):
+def download_type(fn):
     """a recursion function, provides the option for the user to chose between video or only audio, it calls itself until gets a valid input,
     then returns the chose"""
     print(f"\n'{fn}' found,")
@@ -143,16 +121,36 @@ def download_type(url, fn):
         "Do You Want the video or only the audio?\n 1 -> Video\n 2 -> Audio\n  $: "
     )
     if not type.strip() in ["1", "2"]:
-        return download_type(url, fn)
+        return download_type(fn)
     return type
 
 
 def download(type, url):
     """calls the correct download function based on the user chose"""
-    if type == "1":
-        download_video(url)
-    else:
-        download_audio(url)
+    try:
+        if type == "1":
+            dl_type = "video"
+            download_video(url)
+        else:
+            dl_type = "audio"
+            download_audio(url)
+
+    except exceptions.AgeRestrictedError:
+        print("Age Restricted!, can not download, please try with another video :(")
+        exit()
+    except Exception as Error:
+        print(
+            f"Something went wrong when trying to downloading the {dl_type}!, Please re-run the program. ERROR DETAILS : ",
+            Error,
+        )
+        exit()
+
+def network_error_message():
+    """Simply Returns a network error message.
+    This function returns a string message indicating a network error and provides 
+    instructions to check the network connection and try again.
+    """
+    return "NetWork Error!, please check your network and try again\nERROR DETAILS : "
 
 
 # - - - Main - - -
@@ -162,23 +160,23 @@ if __name__ == "__main__":
         try:
             url = yt_url()
             fn = title(url)
-            dl_type = download_type(url, fn)
+            dl_type = download_type(fn)
             download(dl_type, url)
             finish = input(
                 f"'{fn}' Downloaded successfully!, press 'q' for exit or anything else to continue : "
             )
             if finish.strip().lower() == "q":
                 print("Bye-Bye!")
-                exit()
-        except RemoteDisconnected:
-            print("NetWork Error!, please check your network and try again")
-            exit()
-        except IncompleteRead:
-            print("NetWork Error!, please check your network and try again")
-            exit()
-        except URLError:
-            print("NetWork Error!, please check your network and try again")
-            exit()
+                
+        except RemoteDisconnected as Error:
+            print(network_error_message())
+    
+        except IncompleteRead as Error:
+            print(network_error_message())
+    
+        except URLError as Error:
+            print(network_error_message())
+    
         except Exception as Error:
             print(
                 """Something went wrong during the run!, please check your connection and retry, if it happened again
@@ -186,4 +184,6 @@ if __name__ == "__main__":
                 thanks for your contribute to improvement of this program! :)\nERROR DETAILS : """,
                 Error,
             )
+        finally:
+            print(Error)
             exit()
