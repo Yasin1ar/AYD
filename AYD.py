@@ -1,4 +1,4 @@
-'''Alpha YouTube Downloader is a python script for downloading audios and and videos from YouTube,
+"""Alpha YouTube Downloader is a python script for downloading audios and and videos from YouTube,
 You Provide The URL, and AYD serves you with the desired file :) .
 pros:
     - You can download videos and musics for free, no charge, no ad, no disturbance
@@ -15,24 +15,28 @@ cons:
     and doesn't want to pay, see ads, or risk for downloading a video.
 
     but that doesn't mean I don't have plans for making it better, but I could use some help :>>
-    , would be very cool if you guys help me, I would really appreciate, thank for helping, or even using AYD :) '''
+    , would be very cool if you guys help me, I would really appreciate, thank for helping, or even using AYD :) """
 
 # --- Importing dependencies ---
 from pytube import YouTube, exceptions, request
 import os
+
 # for error handling
-from http.client import RemoteDisconnected, IncompleteRead 
+from http.client import RemoteDisconnected, IncompleteRead
 from urllib.error import URLError
 
+
 # If there's not a folder with desired name, create a new one
-def file_path(name="AYD"):
+def file_path(name="AYDs"):
     """creates a folder with provided parameter name if does not exist, then returns the name"""
-    if not name in os.listdir(os.getcwd()):
-        os.mkdir(name)
+    path = os.path.abspath(os.path.dirname(__file__))
+    if not os.path.exists(os.path.join(path, name)):
+        os.makedirs(os.path.join(path, name), exist_ok=True)
     return name
 
 # specifies the chunk size
 request.default_range_size = 1048576
+
 
 def completed(artist, song_name):
     """gets called after the successful download"""
@@ -43,6 +47,7 @@ def progress_bar(self, chunk, bytes_remaining):
     """shows progress bar"""
     print(f"{round(bytes_remaining*0.000001)} MB remaining")
 
+
 def check_name(file_name):
     """checks the name for possible characters in name that unsupported and raise error,
     if found, replaces with whitespace, then returns the corrected name"""
@@ -51,10 +56,12 @@ def check_name(file_name):
             file_name = file_name.replace(i, " ")
     return file_name
 
+
 def title(url):
     """returns the title in desired/ideal format"""
     title = f"{url.author} - {url.title}"
     return title
+
 
 def file_name(url, audio=False):
     """returns the name of the file after passing the checking process, if the file is video it returns the default file name,
@@ -69,6 +76,7 @@ def file_name(url, audio=False):
 
     return file_name
 
+
 def yt_url():
     """get's the YouTube video url from the user and creates a YouTube object"""
     try:
@@ -82,19 +90,22 @@ def yt_url():
         print("Please Enter a Valid YouTube link")
         return yt_url()
 
+
 def download_video(url):
     """Downloads the video"""
     print("Downloading ... ")
     url.streams.filter(progressive=True).get_highest_resolution().download(
-            output_path=file_path(), filename=file_name(url)
-        )
+        output_path=file_path(), filename=file_name(url)
+    )
+
 
 def download_audio(url):
     """Downloads the audio"""
     print("Downloading ... ")
     url.streams.filter(abr=max_abr(url)).first().download(
-            output_path=file_path(), filename=file_name(url, audio=True)
-        )
+        output_path=file_path(), filename=file_name(url, audio=True)
+    )
+
 
 def max_abr(url):
     """finds and returns the highest quality audio"""
@@ -145,9 +156,10 @@ def download(type, url):
         )
         exit()
 
+
 def network_error_message():
     """Simply Returns a network error message.
-    This function returns a string message indicating a network error and provides 
+    This function returns a string message indicating a network error and provides
     instructions to check the network connection and try again.
     """
     return "NetWork Error!, please check your network and try again\nERROR DETAILS : "
@@ -167,16 +179,19 @@ if __name__ == "__main__":
             )
             if finish.strip().lower() == "q":
                 print("Bye-Bye!")
-                
+
         except RemoteDisconnected as Error:
-            print(network_error_message())
-    
+            print(network_error_message(), Error)
+            exit()
+
         except IncompleteRead as Error:
-            print(network_error_message())
-    
+            print(network_error_message(), Error)
+            exit()
+
         except URLError as Error:
-            print(network_error_message())
-    
+            print(network_error_message(), Error)
+            exit()
+
         except Exception as Error:
             print(
                 """Something went wrong during the run!, please check your connection and retry, if it happened again
@@ -184,6 +199,4 @@ if __name__ == "__main__":
                 thanks for your contribute to improvement of this program! :)\nERROR DETAILS : """,
                 Error,
             )
-        finally:
-            print(Error)
             exit()

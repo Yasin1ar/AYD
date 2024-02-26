@@ -1,2 +1,9 @@
-.env
-AYD
+# ignore everything 
+*
+
+# BUT ...
+!.gitignore
+!AYD.py
+!README.md
+!requirements.txt
+!flow_diagram.jpg
