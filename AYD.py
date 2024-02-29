@@ -27,28 +27,29 @@ from urllib.error import URLError
 
 
 # If there's not a folder with desired name, create a new one
-def file_path(name="AYDs"):
+def file_path(name="AYDs") -> str:
     """creates a folder with provided parameter name if does not exist, then returns the name"""
     path = os.path.abspath(os.path.dirname(__file__))
     if not os.path.exists(os.path.join(path, name)):
         os.makedirs(os.path.join(path, name), exist_ok=True)
     return name
 
+
 # specifies the chunk size
 request.default_range_size = 1048576
 
 
-def completed(artist, song_name):
+def completed(author, name) -> None:
     """gets called after the successful download"""
     print(f"\n  Downloaded successfully\n enjoy :)\n")
 
 
-def progress_bar(self, chunk, bytes_remaining):
+def progress_bar(self, chunk, bytes_remaining) -> None:
     """shows progress bar"""
     print(f"{round(bytes_remaining*0.000001)} MB remaining")
 
 
-def check_name(file_name):
+def check_name(file_name:str) -> str:
     """checks the name for possible characters in name that unsupported and raise error,
     if found, replaces with whitespace, then returns the corrected name"""
     for i in file_name:
@@ -57,13 +58,13 @@ def check_name(file_name):
     return file_name
 
 
-def title(url):
+def title(url:YouTube) -> str:
     """returns the title in desired/ideal format"""
     title = f"{url.author} - {url.title}"
     return title
 
 
-def file_name(url, audio=False):
+def file_name(url:YouTube, audio=False) -> str:
     """returns the name of the file after passing the checking process, if the file is video it returns the default file name,
     if the file is audio, it appends the ".mp3" suffix to the desired file name"""
     if audio:
@@ -77,7 +78,7 @@ def file_name(url, audio=False):
     return file_name
 
 
-def yt_url():
+def yt_url() -> YouTube:
     """get's the YouTube video url from the user and creates a YouTube object"""
     try:
         link = input("\nPlease enter the youtube link : ")
@@ -91,7 +92,7 @@ def yt_url():
         return yt_url()
 
 
-def download_video(url):
+def download_video(url:YouTube) -> None:
     """Downloads the video"""
     print("Downloading ... ")
     url.streams.filter(progressive=True).get_highest_resolution().download(
@@ -99,7 +100,7 @@ def download_video(url):
     )
 
 
-def download_audio(url):
+def download_audio(url:YouTube) -> None:
     """Downloads the audio"""
     print("Downloading ... ")
     url.streams.filter(abr=max_abr(url)).first().download(
@@ -107,7 +108,7 @@ def download_audio(url):
     )
 
 
-def max_abr(url):
+def max_abr(url:YouTube) -> str:
     """finds and returns the highest quality audio"""
     try:
         aud = url.streams.filter(only_audio=True)
@@ -124,7 +125,7 @@ def max_abr(url):
         exit()
 
 
-def download_type(fn):
+def download_type(fn:str) -> str:
     """a recursion function, provides the option for the user to chose between video or only audio, it calls itself until gets a valid input,
     then returns the chose"""
     print(f"\n'{fn}' found,")
@@ -136,7 +137,7 @@ def download_type(fn):
     return type
 
 
-def download(type, url):
+def download(type:str, url:YouTube) -> None:
     """calls the correct download function based on the user chose"""
     try:
         if type == "1":
@@ -157,7 +158,7 @@ def download(type, url):
         exit()
 
 
-def network_error_message():
+def network_error_message() -> str:
     """Simply Returns a network error message.
     This function returns a string message indicating a network error and provides
     instructions to check the network connection and try again.
